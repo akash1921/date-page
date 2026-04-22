@@ -328,18 +328,27 @@
       noBtn.style.top  = ny + 'px';
     }
 
-    // Hide until card animation finishes, then snap into place
+    // Hide until positioned, then reveal
     noBtn.style.opacity = '0';
-    window.addEventListener('load', () => {
-      // Card animation is 0.7s — wait for it to finish before reading position
-      setTimeout(() => {
-        snapToPlaceholder();
-        requestAnimationFrame(() => {
-          noBtn.style.transition = '';
-          noBtn.style.opacity = '1';
-        });
-      }, 720);
-    });
+
+    function initNoBtn() {
+      const r = placeholder.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) {
+        // Layout not ready yet — retry
+        setTimeout(initNoBtn, 100);
+        return;
+      }
+      noBtn.style.transition = 'none';
+      noBtn.style.left = r.left + 'px';
+      noBtn.style.top  = r.top  + 'px';
+      requestAnimationFrame(() => {
+        noBtn.style.transition = '';
+        noBtn.style.opacity = '1';
+      });
+    }
+
+    // Wait for card pop animation (0.7s) then init; retry if layout not ready
+    window.addEventListener('load', () => setTimeout(initNoBtn, 750));
 
     noBtn.addEventListener('mouseenter', flee);
     noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); flee(); }, { passive: false });
