@@ -11,11 +11,12 @@
       min-height: 100vh;
       background: linear-gradient(135deg, #ffe0f0, #ffd6e8, #ffecf5);
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       font-family: 'Georgia', serif;
-      overflow: hidden;
+      overflow-x: hidden;
       position: relative;
+      padding: 30px 16px 60px;
     }
 
     .hearts-bg {
@@ -47,12 +48,31 @@
       backdrop-filter: blur(10px);
       border: 2px solid #ffb3d1;
       border-radius: 30px;
-      padding: 60px 70px;
+      padding: 50px 50px;
       text-align: center;
       box-shadow: 0 20px 60px rgba(255, 100, 150, 0.25);
       max-width: 560px;
-      width: 90%;
+      width: 100%;
       animation: cardPop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 20px 12px 80px; }
+
+      .card { padding: 30px 20px; border-radius: 20px; }
+
+      .big-emoji { font-size: 3.2rem; margin-bottom: 10px; }
+
+      h1 { font-size: 1.3rem; }
+
+      .letter { font-size: 0.88rem; padding: 14px 14px; line-height: 1.7; }
+
+      .btn { padding: 12px 28px; font-size: 1rem; }
+
+      .yes-screen h2 { font-size: 1.6rem; }
+      .yes-screen p  { font-size: 0.95rem; }
+
+      .confetti-emojis { font-size: 2rem; }
     }
 
     @keyframes cardPop {
@@ -150,6 +170,15 @@
       padding: 18px 20px;
     }
 
+    .made-with-love {
+      margin-top: 30px;
+      font-size: 0.85rem;
+      color: #e07aa0;
+      opacity: 0.75;
+      letter-spacing: 0.5px;
+      font-style: italic;
+    }
+
     .nudge {
       margin-top: 18px;
       font-size: 0.85rem;
@@ -222,6 +251,8 @@
       <p>I knew you'd say yes!<br>Get ready for the best date ever &#x1F33A;&#x2728;</p>
       <span style="font-size:3.5rem;">&#x1F48F;</span>
     </div>
+
+    <p class="made-with-love">made with love &hearts; &mdash; Akash</p>
   </div>
 
   <!-- No button lives at fixed layer, starts over the placeholder -->
@@ -263,28 +294,34 @@
     function snapToPlaceholder() {
       const r = placeholder.getBoundingClientRect();
       noBtn.style.transition = 'none';
+      // getBoundingClientRect gives viewport-relative coords — correct for fixed positioning
       noBtn.style.left = r.left + 'px';
       noBtn.style.top  = r.top  + 'px';
     }
 
-    // Random position that always keeps button fully inside the viewport
+    // Random position that always keeps button fully inside the visible viewport
     function flee() {
       const w   = noBtn.offsetWidth;
       const h   = noBtn.offsetHeight;
-      const pad = 20;
-      const maxX = window.innerWidth  - w - pad;
-      const maxY = window.innerHeight - h - pad;
+      const pad = 16;
+      // Use visualViewport when available (accounts for mobile browser chrome)
+      const vw = (window.visualViewport ? window.visualViewport.width  : window.innerWidth);
+      const vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
+      const maxX = vw - w - pad;
+      const maxY = vh - h - pad;
 
-      // re-enable transition before moving
       noBtn.style.transition = '';
 
-      let nx, ny;
-      // Make sure it doesn't land back on top of the yes button area
+      let nx, ny, attempts = 0;
       do {
-        nx = pad + Math.random() * (maxX - pad);
-        ny = pad + Math.random() * (maxY - pad);
-      } while (nx > window.innerWidth / 2 - 120 && nx < window.innerWidth / 2 + 120
-            && ny > window.innerHeight / 2 - 60  && ny < window.innerHeight / 2 + 60);
+        nx = pad + Math.random() * Math.max(0, maxX - pad);
+        ny = pad + Math.random() * Math.max(0, maxY - pad);
+        attempts++;
+      } while (
+        attempts < 20 &&
+        nx > vw / 2 - 130 && nx < vw / 2 + 130 &&
+        ny > vh / 2 - 80  && ny < vh / 2 + 80
+      );
 
       noBtn.style.left = nx + 'px';
       noBtn.style.top  = ny + 'px';
