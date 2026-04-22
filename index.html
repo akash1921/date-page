@@ -328,16 +328,14 @@
       noBtn.style.top  = ny + 'px';
     }
 
-    // Hide until positioned, then reveal
+    // Hide until card animation finishes, then snap into place
     noBtn.style.opacity = '0';
+    let initialized = false;
 
     function initNoBtn() {
+      if (initialized) return;
+      initialized = true;
       const r = placeholder.getBoundingClientRect();
-      if (r.width === 0 || r.height === 0) {
-        // Layout not ready yet — retry
-        setTimeout(initNoBtn, 100);
-        return;
-      }
       noBtn.style.transition = 'none';
       noBtn.style.left = r.left + 'px';
       noBtn.style.top  = r.top  + 'px';
@@ -347,8 +345,10 @@
       });
     }
 
-    // Wait for card pop animation (0.7s) then init; retry if layout not ready
-    window.addEventListener('load', () => setTimeout(initNoBtn, 750));
+    // Trigger exactly when the card pop animation ends
+    document.querySelector('.card').addEventListener('animationend', initNoBtn, { once: true });
+    // Fallback in case animationend doesn't fire (some mobile browsers)
+    setTimeout(initNoBtn, 1200);
 
     noBtn.addEventListener('mouseenter', flee);
     noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); flee(); }, { passive: false });
